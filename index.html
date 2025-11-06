@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>تقرير الإنجاز اليومي</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    const EMAILJS_PUBLIC_KEY  = "PASTE_PUBLIC_KEY_HERE";
+    const EMAILJS_SERVICE_ID  = "PASTE_SERVICE_ID_HERE";
+    const EMAILJS_TEMPLATE_ID = "PASTE_TEMPLATE_ID_HERE";
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <h1>تقرير الإنجاز اليومي</h1>
+      <p id="date" class="date"></p>
+    </header>
+
+    <!-- بيانات الموظف -->
+    <section class="card">
+      <h2>بيانات الموظف</h2>
+      <div class="grid g2">
+        <div class="field">
+          <label>اسم الموظف</label>
+          <input id="empName" type="text" placeholder="اكتب اسمك" required />
+        </div>
+        <div class="field">
+          <label>رقم الجوال</label>
+          <input id="empPhone" type="tel" placeholder="05xxxxxxxx" required />
+        </div>
+      </div>
+    </section>
+
+    <!-- القسم الأول -->
+    <section class="card">
+      <h2>القسم الأول: إنجاز المهام</h2>
+      <div class="table table-4">
+        <div class="thead">
+          <div>الوقت</div>
+          <div>المشروع / الموقع</div>
+          <div>المهمة المنجزة</div>
+          <div>كم أنجزت</div>
+          <div></div>
+        </div>
+        <div id="tasks-body" class="tbody"></div>
+      </div>
+      <button class="fab" onclick="addRow('tasks', 4)">+</button>
+    </section>
+
+    <!-- القسم الثاني -->
+    <section class="card">
+      <h2>القسم الثاني: المصروفات</h2>
+      <div class="table table-4">
+        <div class="thead">
+          <div>المبلغ المدفوع</div>
+          <div>تفاصيل المدفوعات</div>
+          <div>تم السداد؟</div>
+          <div>ملاحظات</div>
+          <div></div>
+        </div>
+        <div id="expenses-body" class="tbody"></div>
+      </div>
+      <button class="fab" onclick="addRow('expenses', 4)">+</button>
+    </section>
+
+    <!-- القسم الثالث -->
+    <section class="card">
+      <h2>القسم الثالث: الصعوبات / الاحتياجات / الاقتراحات</h2>
+      <div class="table table-3">
+        <div class="thead">
+          <div>الصعوبات</div>
+          <div>الاحتياجات</div>
+          <div>الاقتراحات</div>
+          <div></div>
+        </div>
+        <div id="feedback-body" class="tbody"></div>
+      </div>
+      <button class="fab" onclick="addRow('feedback', 3)">+</button>
+    </section>
+
+    <section class="actions">
+      <button id="send-btn" class="send">إرسال التقرير</button>
+      <p id="status" class="status"></p>
+    </section>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
