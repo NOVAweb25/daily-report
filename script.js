@@ -60,7 +60,12 @@ function initPage(section,url){
     inputs.forEach(i=>{data[i.previousSibling.textContent]=i.value||"";});
     sendBtn.disabled=true;statusEl.textContent="📤 جاري الإرسال...";
     try{
-      const res=await fetch(url,{method:"POST",body:JSON.stringify(data),headers:{"Content-Type":"application/json"}});
+      const res = await fetch(url, {
+    method: "POST",
+    mode: "no-cors", // ← أضيفي هذا السطر هنا
+    body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" },
+  });
       statusEl.textContent=res.ok?"✅ تم الإرسال بنجاح.":"❌ حدث خطأ أثناء الإرسال.";
       statusEl.className=res.ok?"status success":"status error";
     }catch(e){statusEl.textContent="❌ تعذر الاتصال بـ Google Sheets.";statusEl.className="status error";}
