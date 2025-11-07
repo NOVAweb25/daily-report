@@ -10,12 +10,13 @@ if (dateEl) {
   dateEl.textContent = `تاريخ اليوم: ${today}`;
 }
 
-// ✅ إنشاء صف جديد حسب نوع الصفحة
+// 🔹 أدوات المظهر
 function autoResize(el) {
   el.style.height = "auto";
   el.style.height = el.scrollHeight + "px";
 }
 
+// 🔹 إنشاء صف جديد حسب القسم
 function createRow(section) {
   const row = document.createElement("div");
   row.className = "card";
@@ -83,7 +84,6 @@ function createRow(section) {
   del.textContent = "حذف";
   del.onclick = () => row.remove();
   row.append(del);
-
   return row;
 }
 
@@ -91,94 +91,117 @@ function addRow(section) {
   document.getElementById(`${section}-body`).appendChild(createRow(section));
 }
 
-// ✅ حفظ كل بيانات اليوم في نفس ملف بتاريخ اليوم
-function saveToExcel(section, data) {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+// 🔹 جمع جميع الصفوف داخل القسم الواحد
+function collectRows(section) {
+  const rows = document.querySelectorAll(`#${section}-body .card`);
+  const dataRows = [];
+
+  rows.forEach((row) => {
+    const inputs = row.querySelectorAll("input, textarea, select");
+    const rowData = {};
+    inputs.forEach((input) => {
+      const label = input.previousSibling.textContent || "بيان";
+      rowData[label] = input.value || "";
+    });
+    dataRows.push(rowData);
+  });
+
+  return dataRows;
+}
+
+// 🔹 تحديث أو إنشاء ملف Excel واحد لليوم
+function updateExcelFile(section, dataRows) {
+  const today = new Date().toISOString().split("T")[0];
   const fileName = `تقرير_${today}.xlsx`;
+
   let wb;
 
-  // لو الملف موجود في localStorage نحمله من الذاكرة
+  // ✅ استرجاع الملف من localStorage إن وجد
   const saved = localStorage.getItem(fileName);
   if (saved) {
     const bytes = Uint8Array.from(atob(saved), (c) => c.charCodeAt(0));
     wb = XLSX.read(bytes, { type: "array" });
   } else {
     wb = XLSX.utils.book_new();
-  }
-
-  // لو ورقة اليوم موجودة، نحملها ونكمل فيها
-  let ws = wb.Sheets["اليوم"];
-  let ws_data = [];
-
-  if (ws) {
-    ws_data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-    ws_data.push([""]); // فراغ بين الأقسام
-  } else {
-    // أول مرة
     const todayText = new Date().toLocaleDateString("ar-SA", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
-    ws_data.push([`📅 تاريخ اليوم: ${todayText}`]);
-    ws_data.push([""]);
+    const firstSheet = XLSX.utils.aoa_to_sheet([
+      [`📅 تقرير يوم ${todayText}`],
+      [""],
+    ]);
+    XLSX.utils.book_append_sheet(wb, firstSheet, "اليوم");
   }
 
-  // يضيف عنوان القسم حسب الصفحة
-  const sectionTitles = {
+  // ✅ قراءة الورقة الحالية
+  const ws = wb.Sheets["اليوم"];
+  const ws_data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+  // ✅ عناوين الأقسام
+  const titles = {
     tasks: "📋 جدول المهام",
     expenses: "💰 جدول المصروفات",
     feedback: "💭 جدول الصعوبات والاقتراحات",
   };
 
-  ws_data.push([sectionTitles[section]]);
-  ws_data.push(Object.keys(data));
-  ws_data.push(Object.values(data));
+  // ✅ إذا القسم موجود مسبقًا، نحذف القديم (للتحديث)
+  const sectionIndex = ws_data.findIndex((r) => r[0] === titles[section]);
+  if (sectionIndex !== -1) {
+    // نحذف السطور القديمة لهذا القسم
+    let end = sectionIndex + 1;
+    while (end < ws_data.length && ws_data[end][0] !== undefined && !ws_data[end][0].startsWith("📋") && !ws_data[end][0].startsWith("💰") && !ws_data[end][0].startsWith("💭")) {
+      end++;
+    }
+    ws_data.splice(sectionIndex, end - sectionIndex);
+  }
 
-  // تحويل البيانات لورقة وتحديثها
-  ws = XLSX.utils.aoa_to_sheet(ws_data);
-  wb.Sheets["اليوم"] = ws;
-  wb.SheetNames = ["اليوم"];
+  // ✅ إضافة القسم الجديد مع الصفوف
+  ws_data.push([""]);
+  ws_data.push([titles[section]]);
+  if (dataRows.length > 0) {
+    const headers = Object.keys(dataRows[0]);
+    ws_data.push(headers);
+    dataRows.forEach((r) => ws_data.push(Object.values(r)));
+  }
 
-  // حفظ الملف في التخزين المحلي للجهاز (لأن المتصفح ما يقدر يدمج بين الصفحات)
+  // ✅ إنشاء الورقة المحدثة
+  const newSheet = XLSX.utils.aoa_to_sheet(ws_data);
+  wb.Sheets["اليوم"] = newSheet;
+
+  // ✅ حفظ داخلي فقط (بدون تحميل كل مرة)
   const wbout = XLSX.write(wb, { type: "base64", bookType: "xlsx" });
   localStorage.setItem(fileName, wbout);
 
-  // تنزيل الملف مباشرة
-  XLSX.writeFile(wb, fileName);
+  return wb;
 }
 
-// ✅ جمع بيانات الصفحة الحالية
-function collectData(section) {
-  const inputs = document.querySelectorAll(
-    `#${section}-body input, #${section}-body textarea, #${section}-body select`
-  );
-  const data = {};
-  inputs.forEach((i) => {
-    const key = i.previousSibling.textContent || "بيان";
-    data[key] = i.value || "";
-  });
-  return data;
-}
-
-// ✅ تهيئة الصفحة
+// 🔹 تهيئة الصفحة
 function initPage(section) {
   addRow(section);
   const sendBtn = document.querySelector(`#send-${section}`);
   const statusEl = document.getElementById("status");
 
   sendBtn.addEventListener("click", () => {
-    const data = collectData(section);
-    statusEl.textContent = "📤 جاري إنشاء التقرير...";
+    const dataRows = collectRows(section);
+    statusEl.textContent = "📤 جاري حفظ التقرير...";
     try {
-      saveToExcel(section, data);
-      statusEl.textContent = "✅ تم حفظ التقرير بنجاح.";
+      const wb = updateExcelFile(section, dataRows);
+      statusEl.textContent = "✅ تم حفظ التحديث في ملف اليوم.";
       statusEl.className = "status success";
-      alert("✅ تم حفظ التقرير في ملف Excel بتاريخ اليوم.");
+      alert("✅ تم تحديث ملف تقرير اليوم بنجاح (لم يتم إنشاء نسخة جديدة).");
+
+      // تحميل يدوي فقط لو المستخدم يختار
+      const saveConfirm = confirm("هل ترغب في تنزيل نسخة من التقرير الآن؟");
+      if (saveConfirm) {
+        const today = new Date().toISOString().split("T")[0];
+        XLSX.writeFile(wb, `تقرير_${today}.xlsx`);
+      }
     } catch (e) {
       console.error(e);
-      statusEl.textContent = "❌ حدث خطأ أثناء إنشاء الملف.";
+      statusEl.textContent = "❌ حدث خطأ أثناء حفظ التقرير.";
       statusEl.className = "status error";
     }
   });
