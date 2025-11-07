@@ -3,110 +3,211 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>سجل يومي</title>
+  <title>سجل يومي للموظفين</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #f9f9f9; }
-    input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-    button { background: #28a745; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; width: 100%; }
-    .section { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .toggle { background: #007bff; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-size: 12px; float: left; }
-    .add { background: #fff; border: 2px solid #28a745; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Tajawal', 'Arial', sans-serif; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+      margin: 0; padding: 20px; 
+    }
+    .container { max-width: 800px; margin: auto; }
+    h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+    .date { text-align: center; color: #7f8c8d; font-size: 18px; margin-bottom: 20px; }
+    .card { 
+      background: white; border-radius: 16px; padding: 20px; 
+      margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+    }
+    .card h3 { margin: 0 0 15px; color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
+    input, textarea { 
+      width: 100%; padding: 12px; margin: 8px 0; 
+      border: 1px solid #ddd; border-radius: 10px; 
+      font-size: 16px; transition: 0.3s; 
+    }
+    input:focus, textarea:focus { border-color: #3498db; outline: none; }
+    .add-btn { 
+      width: 44px; height: 44px; border-radius: 50%; 
+      background: #27ae60; color: white; border: none; 
+      font-size: 24px; cursor: pointer; 
+      box-shadow: 0 4px 15px rgba(39,174,96,0.4); 
+      transition: 0.3s; 
+    }
+    .add-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(39,174,96,0.6); }
+    .toggle { 
+      background: #3498db; color: white; border: none; 
+      padding: 6px 12px; border-radius: 20px; 
+      font-size: 12px; cursor: pointer; 
+    }
+    .submit-btn { 
+      background: #e74c3c; color: white; padding: 16px; 
+      border: none; border-radius: 12px; font-size: 18px; 
+      cursor: pointer; width: 100%; margin-top: 20px; 
+      box-shadow: 0 6px 20px rgba(231,76,60,0.4); 
+      transition: 0.3s; 
+    }
+    .submit-btn:hover { background: #c0392b; transform: translateY(-2px); }
+    .hidden { display: none; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row input { flex: 1; }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <h1>سجل يومي للموظف</h1>
-  <p>التاريخ: <span id="date"></span></p>
+  <div class="container">
+    <h1>سجل يومي للموظف</h1>
+    <p class="date">التاريخ: <span id="today"></span></p>
 
-  <form id="form">
-    
-    <!-- معلومات الموظف -->
-    <div class="section">
-      <h3>معلومات الموظف</h3>
-      <input type="text" id="name" placeholder="اسم الموظف" required />
-      <input type="text" id="phone" placeholder="رقم الجوال" required />
-    </div>
+    <form id="dailyForm">
 
-    <!-- المهام -->
-    <div class="section">
-      <h3>المهام <button type="button" class="toggle" onclick="toggleSection('tasks')">ON/OFF</button></h3>
-      <div id="tasks">
-        <textarea id="tasks-text" placeholder="الوقت | المشروع | التفاصيل | كم أنجزت&#10;مثال: 9:00-11:00 | برج الرياض | تركيب أنابيب | 80%"></textarea>
-        <button type="button" class="add" onclick="addTask()">+</button>
+      <!-- معلومات الموظف -->
+      <div class="card">
+        <h3>معلومات الموظف</h3>
+        <input type="text" id="empName" placeholder="اسم الموظف" required />
+        <input type="text" id="empPhone" placeholder="رقم الجوال" required />
       </div>
-    </div>
 
-    <!-- المصروفات -->
-    <div class="section">
-      <h3>المصروفات <button type="button" class="toggle" onclick="toggleSection('expenses')">ON/OFF</button></h3>
-      <div id="expenses">
-        <textarea id="expenses-text" placeholder="المشروع | المصروف | البيان | لمن | رابط الإيصال&#10;مثال: برج الرياض | 500 | مواد | أحمد | https://..."></textarea>
-        <button type="button" class="add" onclick="addExpense()">+</button>
+      <!-- المهام -->
+      <div class="card">
+        <h3>المهام <button type="button" class="toggle" onclick="toggle('tasks')">إيقاف</button></h3>
+        <div id="tasks">
+          <div class="task-row">
+            <div class="row">
+              <input type="text" class="time" placeholder="الوقت (مثل: 9:00-11:00)" required />
+              <input type="text" class="project" placeholder="المشروع" required />
+            </div>
+            <input type="text" class="details" placeholder="تفاصيل المهمة" required />
+            <input type="text" class="done" placeholder="كم أنجزت؟ (مثل: 80%)" required />
+          </div>
+          <button type="button" class="add-btn" onclick="addRow('tasks', 'task-row')">+</button>
+        </div>
       </div>
-    </div>
 
-    <!-- الصعوبات -->
-    <div class="section">
-      <h3>الصعوبات <button type="button" class="toggle" onclick="toggleSection('difficulties')">ON/OFF</button></h3>
-      <div id="difficulties">
-        <textarea id="diff-text" placeholder="الصعوبة | الاحتياج | الاقتراح&#10;مثال: تأخير المواد | معدات | توفير مخزون"></textarea>
-        <button type="button" class="add" onclick="addDiff()">+</button>
+      <!-- المصروفات -->
+      <div class="card">
+        <h3>المصروفات <button type="button" class="toggle" onclick="toggle('expenses')">إيقاف</button></h3>
+        <div id="expenses">
+          <div class="expense-row">
+            <input type="text" class="e-project" placeholder="المشروع / الموقع" required />
+            <input type="text" class="e-amount" placeholder="المبلغ" required />
+            <input type="text" class="e-desc" placeholder="بيان الصرف" required />
+            <input type="text" class="e-to" placeholder="لمن تم الصرف" required />
+            <input type="text" class="e-receipt" placeholder="رابط الإيصال (اختياري)" />
+          </div>
+          <button type="button" class="add-btn" onclick="addRow('expenses', 'expense-row')">+</button>
+        </div>
       </div>
-    </div>
 
-    <button type="submit">إرسال البيانات</button>
-  </form>
+      <!-- الصعوبات -->
+      <div class="card">
+        <h3>الصعوبات <button type="button" class="toggle" onclick="toggle('difficulties')">إيقاف</button></h3>
+        <div id="difficulties">
+          <div class="diff-row">
+            <input type="text" class="d-issue" placeholder="الصعوبة" required />
+            <input type="text" class="d-need" placeholder="الاحتياج" required />
+            <input type="text" class="d-suggest" placeholder="الاقتراح" required />
+          </div>
+          <button type="button" class="add-btn" onclick="addRow('difficulties', 'diff-row')">+</button>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">إرسال السجل</button>
+    </form>
+  </div>
 
   <script>
     // التاريخ
-    document.getElementById('date').textContent = new Date().toLocaleDateString('ar-SA');
+    document.getElementById('today').textContent = new Date().toLocaleDateString('ar-SA');
 
     // تبديل ON/OFF
-    const active = { tasks: true, expenses: true, difficulties: true };
-    function toggleSection(id) {
-      active[id] = !active[id];
-      document.getElementById(id).style.display = active[id] ? 'block' : 'none';
+    const status = { tasks: true, expenses: true, difficulties: true };
+    function toggle(id) {
+      status[id] = !status[id];
+      const el = document.getElementById(id);
+      const btn = el.parentElement.querySelector('.toggle');
+      el.style.display = status[id] ? 'block' : 'none';
+      btn.textContent = status[id] ? 'إيقاف' : 'تفعيل';
+      // إلغاء required إذا مغلق
+      el.querySelectorAll('input').forEach(i => i.required = status[id]);
     }
 
-    // إضافة سطر جديد
-    function addTask() { document.getElementById('tasks-text').value += '\n'; }
-    function addExpense() { document.getElementById('expenses-text').value += '\n'; }
-    function addDiff() { document.getElementById('diff-text').value += '\n'; }
+    // إضافة صف
+    function addRow(containerId, className) {
+      const container = document.getElementById(containerId);
+      const template = container.querySelector(`.${className}`).cloneNode(true);
+      const inputs = template.querySelectorAll('input');
+      inputs.forEach(i => { i.value = ''; i.required = status[containerId]; });
+      container.insertBefore(template, container.querySelector('.add-btn'));
+    }
 
-    // الإرسال
-    document.getElementById('form').addEventListener('submit', async function(e) {
+    // جمع البيانات
+    document.getElementById('dailyForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
+      const tasks = [];
+      if (status.tasks) {
+        document.querySelectorAll('.task-row').forEach(row => {
+          tasks.push({
+            time: row.querySelector('.time').value,
+            project: row.querySelector('.project').value,
+            details: row.querySelector('.details').value,
+            done: row.querySelector('.done').value
+          });
+        });
+      }
+
+      const expenses = [];
+      if (status.expenses) {
+        document.querySelectorAll('.expense-row').forEach(row => {
+          expenses.push({
+            project: row.querySelector('.e-project').value,
+            amount: row.querySelector('.e-amount').value,
+            desc: row.querySelector('.e-desc').value,
+            to: row.querySelector('.e-to').value,
+            receipt: row.querySelector('.e-receipt').value
+          });
+        });
+      }
+
+      const difficulties = [];
+      if (status.difficulties) {
+        document.querySelectorAll('.diff-row').forEach(row => {
+          difficulties.push({
+            issue: row.querySelector('.d-issue').value,
+            need: row.querySelector('.d-need').value,
+            suggest: row.querySelector('.d-suggest').value
+          });
+        });
+      }
+
       const data = {
-        date: new Date().toLocaleDateString('ar-SA'),
-        employee_name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        tasks: active.tasks ? document.getElementById('tasks-text').value.trim() : '',
-        expenses: active.expenses ? document.getElementById('expenses-text').value.trim() : '',
-        difficulties: active.difficulties ? document.getElementById('diff-text').value.trim() : ''
+        "التاريخ": new Date().toLocaleDateString('ar-SA'),
+        "اسم الموظف": document.getElementById('empName').value,
+        "رقم الجوال": document.getElementById('empPhone').value,
+        "المهام": JSON.stringify(tasks),
+        "المصروفات": JSON.stringify(expenses),
+        "الصعوبات": JSON.stringify(difficulties)
       };
 
-      // استبدل هذا الرابط برابط SheetDB الخاص بك
-      const API_URL = 'https://sheetdb.io/api/v1/jppcmio9gtn6t';  // ← غيّر هنا
+      // رابط SheetDB (غيّره مرة واحدة فقط)
+      const API_URL = "https://sheetdb.io/api/v1/bjlibkqajiim6"; // ← غيّر هنا برابطك
 
-      fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [data] })
-      })
-      .then(res => res.json())
-      .then(result => {
-        if (result.created >= 1) {
-          alert('تم الإرسال بنجاح!');
-          document.getElementById('form').reset();
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: [data] })
+        });
+        const result = await res.json();
+        if (result.created) {
+          alert('تم إرسال السجل بنجاح!');
+          document.getElementById('dailyForm').reset();
         } else {
-          alert('فشل الإرسال. تحقق من الرابط أو الصلاحيات.');
+          alert('فشل الإرسال، تحقق من الرابط أو الصلاحيات.');
         }
-      })
-      .catch(err => {
-        console.error(err);
-        alert('خطأ في الاتصال. تحقق من الإنترنت أو الرابط.');
-      });
+      } catch (err) {
+        alert('خطأ في الاتصال، تأكد من الإنترنت.');
+      }
     });
   </script>
 </body>
