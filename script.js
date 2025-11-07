@@ -78,11 +78,12 @@ function initPage(section, url) {
     statusEl.textContent = "📤 جاري الإرسال...";
 
    try {
-      await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      await fetch(SHEET_URL, {
+  method: "POST",
+  headers: { "Content-Type": "text/plain" }, // 👈 لاحظي text/plain
+  body: JSON.stringify(data),
+});
+
 
       statusEl.textContent = "✅ تم الإرسال بنجاح.";
       statusEl.className = "status success";
