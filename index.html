@@ -11,7 +11,7 @@
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
       margin: 0; padding: 20px; 
     }
-    .container { max-width: 900px; margin: auto; }
+    .container { max-width: 800px; margin: auto; }
     h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
     .date { text-align: center; color: #7f8c8d; font-size: 18px; margin-bottom: 20px; }
     .card { 
@@ -19,23 +19,18 @@
       margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
     }
     .card h3 { margin: 0 0 15px; color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
-    .section { 
-      background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 15px; 
-      border: 1px solid #e0e0e0; position: relative;
-    }
-    input, textarea { 
+    input { 
       width: 100%; padding: 12px; margin: 8px 0; 
       border: 1px solid #ddd; border-radius: 10px; 
       font-size: 16px; transition: 0.3s; 
     }
-    input:focus, textarea:focus { border-color: #3498db; outline: none; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    input:focus { border-color: #3498db; outline: none; }
     .add-btn { 
       width: 44px; height: 44px; border-radius: 50%; 
       background: #27ae60; color: white; border: none; 
       font-size: 24px; cursor: pointer; 
       box-shadow: 0 4px 15px rgba(39,174,96,0.4); 
-      transition: 0.3s; position: absolute; left: 15px; bottom: -22px;
+      transition: 0.3s; display: block; margin: 15px auto 0;
     }
     .add-btn:hover { transform: scale(1.1); }
     .toggle { 
@@ -51,7 +46,11 @@
       transition: 0.3s; 
     }
     .submit-btn:hover { background: #c0392b; }
-    .hidden { display: none; }
+    .task-row, .expense-row, .diff-row { 
+      background: #f8f9fa; padding: 15px; border-radius: 12px; 
+      margin-bottom: 15px; border: 1px solid #e0e0e0;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
@@ -74,13 +73,13 @@
       <div class="card">
         <h3>المهام <button type="button" class="toggle" onclick="toggle('tasks')">إيقاف</button></h3>
         <div id="tasks">
-          <div class="task-section section">
+          <div class="task-row">
             <div class="row">
               <input type="text" class="time" placeholder="الوقت (مثل: 9:00-11:00)" required />
               <input type="text" class="project" placeholder="المشروع" required />
             </div>
             <input type="text" class="details" placeholder="تفاصيل المهمة" required />
-            <input type="text" class="done" placeholder="نسبة الإنجاز (مثل: 80%)" required />
+            <input type="text" class="done" placeholder="كم أنجزت؟ (مثل: 80%)" required />
           </div>
           <button type="button" class="add-btn" onclick="addTask()">+</button>
         </div>
@@ -90,7 +89,7 @@
       <div class="card">
         <h3>المصروفات <button type="button" class="toggle" onclick="toggle('expenses')">إيقاف</button></h3>
         <div id="expenses">
-          <div class="expense-section section">
+          <div class="expense-row">
             <input type="text" class="e-project" placeholder="المشروع / الموقع" required />
             <input type="text" class="e-amount" placeholder="المبلغ" required />
             <input type="text" class="e-desc" placeholder="بيان الصرف" required />
@@ -105,7 +104,7 @@
       <div class="card">
         <h3>الصعوبات <button type="button" class="toggle" onclick="toggle('difficulties')">إيقاف</button></h3>
         <div id="difficulties">
-          <div class="diff-section section">
+          <div class="diff-row">
             <input type="text" class="d-issue" placeholder="الصعوبة" required />
             <input type="text" class="d-need" placeholder="الاحتياج" required />
             <input type="text" class="d-suggest" placeholder="الاقتراح" required />
@@ -132,78 +131,80 @@
       el.querySelectorAll('input').forEach(i => i.required = status[id]);
     }
 
-    function addSection(containerId, templateClass, callback) {
+    function addRow(containerId, className) {
       const container = document.getElementById(containerId);
-      const template = container.querySelector(`.${templateClass}`).cloneNode(true);
+      const template = container.querySelector(`.${className}`).cloneNode(true);
       const inputs = template.querySelectorAll('input');
       inputs.forEach(i => { i.value = ''; i.required = status[containerId]; });
       container.insertBefore(template, container.querySelector('.add-btn'));
     }
 
-    function addTask() { addSection('tasks', 'task-section'); }
-    function addExpense() { addSection('expenses', 'expense-section'); }
-    function addDiff() { addSection('difficulties', 'diff-section'); }
+    function addTask() { addRow('tasks', 'task-row'); }
+    function addExpense() { addRow('expenses', 'expense-row'); }
+    function addDiff() { addRow('difficulties', 'diff-row'); }
 
     document.getElementById('dailyForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const rows = [];
+      const dataRows = [];
 
-      // جمع المهام
-      if (status.tasks) {
-        document.querySelectorAll('.task-section').forEach(sec => {
-          rows.push({
-            "وقت المهمة": sec.querySelector('.time').value,
-            "مشروع المهمة": sec.querySelector('.project').value,
-            "تفاصيل المهمة": sec.querySelector('.details').value,
-            "نسبة الإنجاز": sec.querySelector('.done').value
-          });
-        });
-      }
-
-      // جمع المصروفات
-      if (status.expenses) {
-        document.querySelectorAll('.expense-section').forEach(sec => {
-          rows.push({
-            "مشروع المصروف": sec.querySelector('.e-project').value,
-            "مبلغ المصروف": sec.querySelector('.e-amount').value,
-            "بيان المصروف": sec.querySelector('.e-desc').value,
-            "لمن تم الصرف": sec.querySelector('.e-to').value,
-            "رابط الإيصال": sec.querySelector('.e-receipt').value
-          });
-        });
-      }
-
-      // جمع الصعوبات
-      if (status.difficulties) {
-        document.querySelectorAll('.diff-section').forEach(sec => {
-          rows.push({
-            "الصعوبة": sec.querySelector('.d-issue').value,
-            "الاحتياج": sec.querySelector('.d-need').value,
-            "الاقتراح": sec.querySelector('.d-suggest').value
-          });
-        });
-      }
-
-      // إضافة معلومات الموظف في كل صف
-      const finalData = rows.map(row => ({
+      const empData = {
         "التاريخ": new Date().toLocaleDateString('ar-SA'),
         "اسم الموظف": document.getElementById('empName').value,
-        "رقم الجوال": document.getElementById('empPhone').value,
-        ...row
-      }));
+        "رقم الجوال": document.getElementById('empPhone').value
+      };
 
+      // المهام
+      if (status.tasks) {
+        document.querySelectorAll('.task-row').forEach(row => {
+          dataRows.push({
+            ...empData,
+            "وقت المهمة": row.querySelector('.time').value,
+            "مشروع المهمة": row.querySelector('.project').value,
+            "تفاصيل المهمة": row.querySelector('.details').value,
+            "نسبة الإنجاز": row.querySelector('.done').value
+          });
+        });
+      }
+
+      // المصروفات
+      if (status.expenses) {
+        document.querySelectorAll('.expense-row').forEach(row => {
+          dataRows.push({
+            ...empData,
+            "مشروع المصروف": row.querySelector('.e-project').value,
+            "مبلغ المصروف": row.querySelector('.e-amount').value,
+            "بيان المصروف": row.querySelector('.e-desc').value,
+            "لمن تم الصرف": row.querySelector('.e-to').value,
+            "رابط الإيصال": row.querySelector('.e-receipt').value
+          });
+        });
+      }
+
+      // الصعوبات
+      if (status.difficulties) {
+        document.querySelectorAll('.diff-row').forEach(row => {
+          dataRows.push({
+            ...empData,
+            "الصعوبة": row.querySelector('.d-issue').value,
+            "الاحتياج": row.querySelector('.d-need').value,
+            "الاقتراح": row.querySelector('.d-suggest').value
+          });
+        });
+      }
+
+      // إرسال كل صف على حدة
       const API_URL = "https://sheetdb.io/api/v1/bjlibkqajiim6"; // غيّر برابطك
 
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: finalData })
+          body: JSON.stringify({ data: dataRows })
         });
         const result = await res.json();
         if (result.created >= 1) {
-          alert(`تم إرسال ${finalData.length} صفوف بنجاح!`);
+          alert(`تم إرسال ${dataRows.length} صفوف بنجاح!`);
           document.getElementById('dailyForm').reset();
         } else {
           alert('فشل الإرسال.');
