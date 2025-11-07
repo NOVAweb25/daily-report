@@ -4,53 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>سجل يومي للموظفين</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { 
-      font-family: 'Tajawal', 'Arial', sans-serif; 
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
-      margin: 0; padding: 20px; 
-    }
-    .container { max-width: 800px; margin: auto; }
-    h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
-    .date { text-align: center; color: #7f8c8d; font-size: 18px; margin-bottom: 20px; }
-    .card { 
-      background: white; border-radius: 16px; padding: 20px; 
-      margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
-    }
-    .card h3 { margin: 0 0 15px; color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
-    input, textarea { 
-      width: 100%; padding: 12px; margin: 8px 0; 
-      border: 1px solid #ddd; border-radius: 10px; 
-      font-size: 16px; transition: 0.3s; 
-    }
-    input:focus, textarea:focus { border-color: #3498db; outline: none; }
-    .add-btn { 
-      width: 44px; height: 44px; border-radius: 50%; 
-      background: #27ae60; color: white; border: none; 
-      font-size: 24px; cursor: pointer; 
-      box-shadow: 0 4px 15px rgba(39,174,96,0.4); 
-      transition: 0.3s; 
-    }
-    .add-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(39,174,96,0.6); }
-    .toggle { 
-      background: #3498db; color: white; border: none; 
-      padding: 6px 12px; border-radius: 20px; 
-      font-size: 12px; cursor: pointer; 
-    }
-    .submit-btn { 
-      background: #e74c3c; color: white; padding: 16px; 
-      border: none; border-radius: 12px; font-size: 18px; 
-      cursor: pointer; width: 100%; margin-top: 20px; 
-      box-shadow: 0 6px 20px rgba(231,76,60,0.4); 
-      transition: 0.3s; 
-    }
-    .submit-btn:hover { background: #c0392b; transform: translateY(-2px); }
-    .hidden { display: none; }
-    .row { display: flex; gap: 10px; align-items: center; }
-    .row input { flex: 1; }
-  </style>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Tajawal', sans-serif; 
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); 
+      padding: 20px; 
+    }
+    .container { max-width: 900px; margin: auto; }
+    h1 { text-align: center; color: #1565c0; margin-bottom: 8px; font-size: 28px; }
+    .date { text-align: center; color: #546e7a; font-size: 18px; margin-bottom: 25px; }
+    
+    .card { 
+      background: white; border-radius: 18px; padding: 22px; 
+      margin-bottom: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+      border: 1px solid #e0e0e0;
+    }
+    .card h3 { 
+      margin: 0 0 18px; color: #1e88e5; font-size: 20px; 
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    
+    input { 
+      width: 100%; padding: 12px 14px; margin: 8px 0; 
+      border: 1px solid #ddd; border-radius: 12px; 
+      font-size: 16px; transition: all 0.3s; 
+    }
+    input:focus { border-color: #1e88e5; outline: none; box-shadow: 0 0 0 3px rgba(30,136,229,0.15); }
+    
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
+    
+    .add-btn { 
+      width: 48px; height: 48px; border-radius: 50%; 
+      background: #27ae60; color: white; border: none; 
+      font-size: 26px; cursor: pointer; font-weight: bold;
+      box-shadow: 0 5px 18px rgba(39,174,96,0.4); 
+      transition: all 0.3s; margin: 15px auto; display: block;
+    }
+    .add-btn:hover { transform: scale(1.12); box-shadow: 0 8px 25px rgba(39,174,96,0.6); }
+    
+    .toggle { 
+      background: #ff9800; color: white; border: none; 
+      padding: 8px 16px; border-radius: 25px; 
+      font-size: 13px; cursor: pointer; font-weight: 500;
+    }
+    .toggle.active { background: #4caf50; }
+    
+    .submit-btn { 
+      background: #d32f2f; color: white; padding: 18px; 
+      border: none; border-radius: 14px; font-size: 20px; 
+      cursor: pointer; width: 100%; margin-top: 25px; 
+      box-shadow: 0 8px 25px rgba(211,47,47,0.3); 
+      transition: all 0.3s; font-weight: bold;
+    }
+    .submit-btn:hover { background: #b71c1c; transform: translateY(-3px); }
+    
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
 
@@ -69,45 +82,49 @@
 
       <!-- المهام -->
       <div class="card">
-        <h3>المهام <button type="button" class="toggle" onclick="toggle('tasks')">إيقاف</button></h3>
+        <h3>المهام <button type="button" class="toggle active" onclick="toggleSection('tasks')">إيقاف</button></h3>
         <div id="tasks">
           <div class="task-row">
             <div class="row">
-              <input type="text" class="time" placeholder="الوقت (مثل: 9:00-11:00)" required />
-              <input type="text" class="project" placeholder="المشروع" required />
+              <input type="text" class="t-time" placeholder="الوقت (مثل: 9:00-11:00)" required />
+              <input type="text" class="t-project" placeholder="المشروع" required />
             </div>
-            <input type="text" class="details" placeholder="تفاصيل المهمة" required />
-            <input type="text" class="done" placeholder="كم أنجزت؟ (مثل: 80%)" required />
+            <input type="text" class="t-details" placeholder="تفاصيل المهمة" required />
+            <input type="text" class="t-done" placeholder="نسبة الإنجاز (مثل: 80%)" required />
           </div>
-          <button type="button" class="add-btn" onclick="addRow('tasks', 'task-row')">+</button>
+          <button type="button" class="add-btn" onclick="addTask()">+</button>
         </div>
       </div>
 
       <!-- المصروفات -->
       <div class="card">
-        <h3>المصروفات <button type="button" class="toggle" onclick="toggle('expenses')">إيقاف</button></h3>
+        <h3>المصروفات <button type="button" class="toggle active" onclick="toggleSection('expenses')">إيقاف</button></h3>
         <div id="expenses">
           <div class="expense-row">
-            <input type="text" class="e-project" placeholder="المشروع / الموقع" required />
-            <input type="text" class="e-amount" placeholder="المبلغ" required />
-            <input type="text" class="e-desc" placeholder="بيان الصرف" required />
-            <input type="text" class="e-to" placeholder="لمن تم الصرف" required />
+            <div class="row-4">
+              <input type="text" class="e-project" placeholder="المشروع / الموقع" required />
+              <input type="text" class="e-amount" placeholder="المبلغ" required />
+              <input type="text" class="e-desc" placeholder="بيان الصرف" required />
+              <input type="text" class="e-to" placeholder="لمن تم الصرف" required />
+            </div>
             <input type="text" class="e-receipt" placeholder="رابط الإيصال (اختياري)" />
           </div>
-          <button type="button" class="add-btn" onclick="addRow('expenses', 'expense-row')">+</button>
+          <button type="button" class="add-btn" onclick="addExpense()">+</button>
         </div>
       </div>
 
       <!-- الصعوبات -->
       <div class="card">
-        <h3>الصعوبات <button type="button" class="toggle" onclick="toggle('difficulties')">إيقاف</button></h3>
+        <h3>الصعوبات <button type="button" class="toggle active" onclick="toggleSection('difficulties')">إيقاف</button></h3>
         <div id="difficulties">
           <div class="diff-row">
-            <input type="text" class="d-issue" placeholder="الصعوبة" required />
-            <input type="text" class="d-need" placeholder="الاحتياج" required />
-            <input type="text" class="d-suggest" placeholder="الاقتراح" required />
+            <div class="row-3">
+              <input type="text" class="d-issue" placeholder="الصعوبة" required />
+              <input type="text" class="d-need" placeholder="الاحتياج" required />
+              <input type="text" class="d-suggest" placeholder="الاقتراح" required />
+            </div>
           </div>
-          <button type="button" class="add-btn" onclick="addRow('difficulties', 'diff-row')">+</button>
+          <button type="button" class="add-btn" onclick="addDiff()">+</button>
         </div>
       </div>
 
@@ -119,78 +136,83 @@
     // التاريخ
     document.getElementById('today').textContent = new Date().toLocaleDateString('ar-SA');
 
-    // تبديل ON/OFF
-    const status = { tasks: true, expenses: true, difficulties: true };
-    function toggle(id) {
-      status[id] = !status[id];
-      const el = document.getElementById(id);
-      const btn = el.parentElement.querySelector('.toggle');
-      el.style.display = status[id] ? 'block' : 'none';
-      btn.textContent = status[id] ? 'إيقاف' : 'تفعيل';
-      // إلغاء required إذا مغلق
-      el.querySelectorAll('input').forEach(i => i.required = status[id]);
+    // حالة الأقسام
+    const active = { tasks: true, expenses: true, difficulties: true };
+
+    function toggleSection(id) {
+      active[id] = !active[id];
+      const section = document.getElementById(id);
+      const btn = section.parentElement.querySelector('.toggle');
+      section.style.display = active[id] ? 'block' : 'none';
+      btn.textContent = active[id] ? 'إيقاف' : 'تفعيل';
+      btn.classList.toggle('active', active[id]);
+      section.querySelectorAll('input').forEach(i => i.required = active[id]);
     }
 
-    // إضافة صف
-    function addRow(containerId, className) {
-      const container = document.getElementById(containerId);
-      const template = container.querySelector(`.${className}`).cloneNode(true);
-      const inputs = template.querySelectorAll('input');
-      inputs.forEach(i => { i.value = ''; i.required = status[containerId]; });
+    // إضافة صفوف
+    function addTask() {
+      const container = document.getElementById('tasks');
+      const template = container.querySelector('.task-row').cloneNode(true);
+      template.querySelectorAll('input').forEach(i => { i.value = ''; i.required = active.tasks; });
       container.insertBefore(template, container.querySelector('.add-btn'));
     }
 
-    // جمع البيانات
+    function addExpense() {
+      const container = document.getElementById('expenses');
+      const template = container.querySelector('.expense-row').cloneNode(true);
+      template.querySelectorAll('input').forEach(i => { i.value = ''; i.required = active.expenses; });
+      container.insertBefore(template, container.querySelector('.add-btn'));
+    }
+
+    function addDiff() {
+      const container = document.getElementById('difficulties');
+      const template = container.querySelector('.diff-row').cloneNode(true);
+      template.querySelectorAll('input').forEach(i => { i.value = ''; i.required = active.difficulties; });
+      container.insertBefore(template, container.querySelector('.add-btn'));
+    }
+
+    // جمع البيانات وإرسالها
     document.getElementById('dailyForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-
-      const tasks = [];
-      if (status.tasks) {
-        document.querySelectorAll('.task-row').forEach(row => {
-          tasks.push({
-            time: row.querySelector('.time').value,
-            project: row.querySelector('.project').value,
-            details: row.querySelector('.details').value,
-            done: row.querySelector('.done').value
-          });
-        });
-      }
-
-      const expenses = [];
-      if (status.expenses) {
-        document.querySelectorAll('.expense-row').forEach(row => {
-          expenses.push({
-            project: row.querySelector('.e-project').value,
-            amount: row.querySelector('.e-amount').value,
-            desc: row.querySelector('.e-desc').value,
-            to: row.querySelector('.e-to').value,
-            receipt: row.querySelector('.e-receipt').value
-          });
-        });
-      }
-
-      const difficulties = [];
-      if (status.difficulties) {
-        document.querySelectorAll('.diff-row').forEach(row => {
-          difficulties.push({
-            issue: row.querySelector('.d-issue').value,
-            need: row.querySelector('.d-need').value,
-            suggest: row.querySelector('.d-suggest').value
-          });
-        });
-      }
 
       const data = {
         "التاريخ": new Date().toLocaleDateString('ar-SA'),
         "اسم الموظف": document.getElementById('empName').value,
-        "رقم الجوال": document.getElementById('empPhone').value,
-        "المهام": JSON.stringify(tasks),
-        "المصروفات": JSON.stringify(expenses),
-        "الصعوبات": JSON.stringify(difficulties)
+        "رقم الجوال": document.getElementById('empPhone').value
       };
 
-      // رابط SheetDB (غيّره مرة واحدة فقط)
-      const API_URL = "https://sheetdb.io/api/v1/bjlibkqajiim6"; // ← غيّر هنا برابطك
+      // المهام
+      if (active.tasks) {
+        document.querySelectorAll('.task-row').forEach(row => {
+          data["وقت المهمة"] = row.querySelector('.t-time').value;
+          data["مشروع المهمة"] = row.querySelector('.t-project').value;
+          data["تفاصيل المهمة"] = row.querySelector('.t-details').value;
+          data["نسبة الإنجاز"] = row.querySelector('.t-done').value;
+        });
+      }
+
+      // المصروفات
+      if (active.expenses) {
+        document.querySelectorAll('.expense-row').forEach(row => {
+          data["مشروع المصروف"] = row.querySelector('.e-project').value;
+          data["مبلغ المصروف"] = row.querySelector('.e-amount').value;
+          data["بيان الصرف"] = row.querySelector('.e-desc').value;
+          data["لمن تم الصرف"] = row.querySelector('.e-to').value;
+          data["رابط الإيصال"] = row.querySelector('.e-receipt').value;
+        });
+      }
+
+      // الصعوبات
+      if (active.difficulties) {
+        document.querySelectorAll('.diff-row').forEach(row => {
+          data["الصعوبة"] = row.querySelector('.d-issue').value;
+          data["الاحتياج"] = row.querySelector('.d-need').value;
+          data["الاقتراح"] = row.querySelector('.d-suggest').value;
+        });
+      }
+
+      // رابط SheetDB (غيّره مرة واحدة)
+      const API_URL = "https://sheetdb.io/api/v1/bjlibkqajiim6"; // ← غيّر هنا
 
       try {
         const res = await fetch(API_URL, {
@@ -199,14 +221,14 @@
           body: JSON.stringify({ data: [data] })
         });
         const result = await res.json();
-        if (result.created) {
-          alert('تم إرسال السجل بنجاح!');
+        if (result.created >= 1) {
+          alert('تم إرسال السجل بنجاح! سيظهر في Google Sheet خلال ثواني.');
           document.getElementById('dailyForm').reset();
         } else {
-          alert('فشل الإرسال، تحقق من الرابط أو الصلاحيات.');
+          alert('فشل الإرسال. تأكد من رابط SheetDB وصلاحيات الملف.');
         }
       } catch (err) {
-        alert('خطأ في الاتصال، تأكد من الإنترنت.');
+        alert('خطأ في الاتصال. تأكد من الإنترنت أو الرابط.');
       }
     });
   </script>
