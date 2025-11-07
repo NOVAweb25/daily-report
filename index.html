@@ -1,11 +1,55 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl">د
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>تقرير الإنجاز اليومي - المهام</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+<script>
+const SHEETDB_URL = "https://sheetdb.io/api/v1/2ox4qkz0u3oom"; // رابطك من SheetDB
+
+document.getElementById("send-tasks").addEventListener("click", async () => {
+  const empName = document.getElementById("empName").value;
+  const empPhone = document.getElementById("empPhone").value;
+
+  // جمع المهام المضافة
+  const rows = document.querySelectorAll("#tasks-body .row");
+  const data = [];
+
+  rows.forEach(row => {
+    const project = row.querySelector(".project").value;
+    const task = row.querySelector(".task").value;
+    const progress = row.querySelector(".progress").value;
+    data.push({
+      التاريخ: new Date().toLocaleString(),
+      اسم_الموظف: empName,
+      الجوال: empPhone,
+      المشروع: project,
+      المهمة: task,
+      كم_أنجز: progress
+    });
+  });
+
+  try {
+    const res = await fetch(SHEETDB_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data })
+    });
+
+    if (res.ok) {
+      alert("✅ تم حفظ البيانات بنجاح في Google Sheet!");
+    } else {
+      alert("⚠️ حدث خطأ أثناء الإرسال");
+    }
+  } catch (err) {
+    alert("❌ لم يتم الاتصال بـ SheetDB");
+    console.error(err);
+  }
+});
+</script>
+
 <body>
   <nav class="navbar">
     <div class="nav-left">
@@ -45,7 +89,10 @@
     <p id="status" class="status"></p>
   </div>
 
-  <script src="script.js"></script>
-  <script>const SHEET_URL="https://script.google.com/macros/s/REPLACE_TASKS_URL/exec";initPage("tasks",SHEET_URL);</script>
+<script src="script.js"></script>
+<script>
+  const SHEETDB_URL = "https://sheetdb.io/api/v1/2ox4qkz0u3oom"; // هذا رابطك من SheetDB
+</script>
+
 </body>
 </html>
