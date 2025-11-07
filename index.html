@@ -65,9 +65,14 @@
       padding: 14px; border-radius: 10px;
       border: 1px solid #4a5568;
       background: #f7fafc;
+      appearance: none; /* لتحسين المظهر */
     }
     input[type="time"]::-webkit-calendar-picker-indicator {
       filter: invert(0.6);
+      cursor: pointer;
+      background-color: #FFD166; /* لجعلها واضحة */
+      padding: 5px;
+      border-radius: 5px;
     }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     /* زر إضافة صف (أصفر مع توهج قوي) */
@@ -127,6 +132,11 @@
       .add-btn { width: 45px; height: 45px; font-size: 24px; margin: 10px auto; }
       .delete-btn { top: 8px; left: 8px; width: 30px; height: 30px; font-size: 16px; }
       .submit-btn { padding: 16px; font-size: 18px; }
+      input[type="time"] { 
+        font-size: 18px; /* أكبر للوضوح في الجوال */
+        background: #f7fafc url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTIgMThsLTYgLTZIM1YxMGg2bDYgNnptMCAwVjZoNHY2eiIvPjwvc3ZnPg==') no-repeat right 10px center; /* أيقونة ساعة */
+        background-size: 24px;
+      }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -157,11 +167,11 @@
             <button type="button" class="delete-btn" onclick="deleteSection(this)">X</button>
             <div class="row">
               <!-- منتقي الوقت الذكي -->
-              <input type="time" class="time" required />
+              <input type="time" class="time" placeholder="اختر الوقت" required />
               <input type="text" class="project" placeholder="المشروع" required />
             </div>
             <textarea class="details" placeholder="تفاصيل المهمة" required rows="3"></textarea>
-            <input type="text" class="done" placeholder="نسبة الإنجاز" <required />
+            <input type="text" class="done" placeholder="نسبة الإنجاز (مثل: 80%)" required />
           </div>
           <button type="button" class="add-btn" onclick="addTask()">+</button>
         </div>
@@ -248,9 +258,23 @@
       const displayHour = h > 12 ? h - 12 : (h === 0 ? 12 : h);
       return `${displayHour}:${minutes} ${period}`;
     }
-    // الإرسال
+    // الإرسال مع التحقق من الحقول
     document.getElementById('dailyForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      // التحقق من الحقول المطلوبة
+      let isValid = true;
+      document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+        if (field.value.trim() === '' && field.required) {
+          isValid = false;
+          field.style.borderColor = '#C8202F'; // تظليل أحمر للخطأ
+        } else {
+          field.style.borderColor = '#4a5568'; // إعادة اللون الافتراضي
+        }
+      });
+      if (!isValid) {
+        alert('يرجى ملء جميع الحقول المطلوبة!');
+        return;
+      }
       const tasks = [];
       if (status.tasks) {
         document.querySelectorAll('.task-section').forEach(sec => {
