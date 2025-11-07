@@ -1,98 +1,241 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">د
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تقرير الإنجاز اليومي - المهام</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل يومي للموظفين</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        th { background-color: #f2f2f2; }
+        .add-btn { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            background-color: #fff; border: 1px solid #ccc; 
+            font-size: 24px; cursor: pointer; 
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3); 
+            display: block; margin: 10px auto; 
+        }
+        .toggle-btn { margin-left: 10px; }
+        .hidden { display: none; }
+    </style>
 </head>
-<script>
-const SHEETDB_URL = "https://sheetdb.io/api/v1/2ox4qkz0u3oom"; // رابطك من SheetDB
-
-document.getElementById("send-tasks").addEventListener("click", async () => {
-  const empName = document.getElementById("empName").value;
-  const empPhone = document.getElementById("empPhone").value;
-
-  // جمع المهام المضافة
-  const rows = document.querySelectorAll("#tasks-body .row");
-  const data = [];
-
-  rows.forEach(row => {
-    const project = row.querySelector(".project").value;
-    const task = row.querySelector(".task").value;
-    const progress = row.querySelector(".progress").value;
-    data.push({
-      التاريخ: new Date().toLocaleString(),
-      اسم_الموظف: empName,
-      الجوال: empPhone,
-      المشروع: project,
-      المهمة: task,
-      كم_أنجز: progress
-    });
-  });
-
-  try {
-    const res = await fetch(SHEETDB_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data })
-    });
-
-    if (res.ok) {
-      alert("✅ تم حفظ البيانات بنجاح في Google Sheet!");
-    } else {
-      alert("⚠️ حدث خطأ أثناء الإرسال");
-    }
-  } catch (err) {
-    alert("❌ لم يتم الاتصال بـ SheetDB");
-    console.error(err);
-  }
-});
-</script>
-
 <body>
-  <nav class="navbar">
-    <div class="nav-left">
-      <div class="logo">ن</div>
-      <div class="nav-links">
-        <a href="index.html">المهام</a>
-        <a href="expenses.html">المصروفات</a>
-        <a href="feedback.html">الصعوبات</a>
-      </div>
-    </div>
-    <button class="lang-toggle" onclick="toggleLang()">EN</button>
-  </nav>
+    <h1>سجل يومي</h1>
+    <p>التاريخ: <span id="date"></span></p>
+    
+    <form id="daily-log-form">
+        <!-- جدول الموظف -->
+        <h2>جدول الموظف</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم الموظف</th>
+                    <th>رقم الجوال</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" name="employee_name" required></td>
+                    <td><input type="text" name="phone" required></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- جدول المهام -->
+        <h2>جدول المهام <button type="button" class="toggle-btn" onclick="toggleTable('tasks')">ON/OFF</button></h2>
+        <table id="tasks-table">
+            <thead>
+                <tr>
+                    <th>الوقت</th>
+                    <th>المشروع</th>
+                    <th>تفاصيل المهمة</th>
+                    <th>كم انجزت منها</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="task-row">
+                    <td><input type="text" class="task-time" required></td>
+                    <td><input type="text" class="task-project" required></td>
+                    <td><input type="text" class="task-details" required></td>
+                    <td><input type="text" class="task-accomplished" required></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" class="add-btn" onclick="addRow('tasks-table', 'task-row')">+</button>
+        
+        <!-- جدول المصروفات -->
+        <h2>جدول المصروفات <button type="button" class="toggle-btn" onclick="toggleTable('expenses')">ON/OFF</button></h2>
+        <table id="expenses-table">
+            <thead>
+                <tr>
+                    <th>المشروع / الموقع</th>
+                    <th>المصروف</th>
+                    <th>بيان الصرف</th>
+                    <th>لمن تم الصرف</th>
+                    <th>إرفاق إيصال (pdf/png/jpg)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="expense-row">
+                    <td><input type="text" class="expense-project" required></td>
+                    <td><input type="text" class="expense-amount" required></td>
+                    <td><input type="text" class="expense-statement" required></td>
+                    <td><input type="text" class="expense-to" required></td>
+                    <td><input type="file" class="expense-receipt" accept=".pdf,.png,.jpg" required></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" class="add-btn" onclick="addRow('expenses-table', 'expense-row')">+</button>
+        
+        <!-- جدول الصعوبات -->
+        <h2>جدول الصعوبات <button type="button" class="toggle-btn" onclick="toggleTable('difficulties')">ON/OFF</button></h2>
+        <table id="difficulties-table">
+            <thead>
+                <tr>
+                    <th>الصعوبات</th>
+                    <th>الاحتياجات</th>
+                    <th>الاقتراحات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="difficulty-row">
+                    <td><input type="text" class="difficulty-issue" required></td>
+                    <td><input type="text" class="difficulty-needs" required></td>
+                    <td><input type="text" class="difficulty-suggestions" required></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" class="add-btn" onclick="addRow('difficulties-table', 'difficulty-row')">+</button>
+        
+        <button type="submit">إرسال</button>
+    </form>
 
-  <div class="container">
-    <h1>تقرير الإنجاز اليومي</h1>
-    <p id="date" class="date"></p>
+    <script>
+        // تعيين التاريخ تلقائيًا
+        document.getElementById('date').textContent = new Date().toLocaleDateString('ar-SA');
 
-    <section class="card">
-      <h2>بيانات الموظف</h2>
-      <div class="field">
-        <label>اسم الموظف</label>
-        <input id="empName" type="text" required />
-      </div>
-      <div class="field">
-        <label>رقم الجوال</label>
-        <input id="empPhone" type="tel" placeholder="05xxxxxxxx" required />
-      </div>
-    </section>
+        // دالة لإضافة صف جديد
+        function addRow(tableId, rowClass) {
+            const table = document.getElementById(tableId).querySelector('tbody');
+            const newRow = table.querySelector(`.${rowClass}`).cloneNode(true);
+            const inputs = newRow.querySelectorAll('input');
+            inputs.forEach(input => input.value = '');
+            table.appendChild(newRow);
+        }
 
-    <section class="card">
-      <h2>القسم الأول: إنجاز المهام</h2>
-      <div id="tasks-body"></div>
-      <button class="fab" onclick="addRow('tasks')">+</button>
-    </section>
+        // دالة لتبديل ON/OFF
+        const toggles = {
+            tasks: true,
+            expenses: true,
+            difficulties: true
+        };
 
-    <button id="send-tasks" class="send">إرسال المهام</button>
-    <p id="status" class="status"></p>
-  </div>
+        function toggleTable(tableName) {
+            toggles[tableName] = !toggles[tableName];
+            const table = document.getElementById(`${tableName}-table`);
+            const inputs = table.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.required = toggles[tableName];
+            });
+            const btn = table.parentElement.querySelector('.toggle-btn');
+            btn.textContent = toggles[tableName] ? 'ON/OFF' : 'OFF/ON'; // يمكن تحسين
+        }
 
-<script src="script.js"></script>
-<script>
-  const SHEETDB_URL = "https://sheetdb.io/api/v1/2ox4qkz0u3oom"; // هذا رابطك من SheetDB
-</script>
+        // التعامل مع الإرسال
+        const form = document.getElementById('daily-log-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
+            // جمع البيانات
+            const data = {
+                date: new Date().toLocaleDateString('ar-SA'),
+                employee_name: form.employee_name.value,
+                phone: form.phone.value,
+                tasks: [],
+                expenses: [],
+                difficulties: []
+            };
+
+            // المهام
+            if (toggles.tasks) {
+                const taskRows = document.querySelectorAll('.task-row');
+                taskRows.forEach(row => {
+                    data.tasks.push({
+                        time: row.querySelector('.task-time').value,
+                        project: row.querySelector('.task-project').value,
+                        details: row.querySelector('.task-details').value,
+                        accomplished: row.querySelector('.task-accomplished').value
+                    });
+                });
+            }
+
+            // المصروفات
+            if (toggles.expenses) {
+                const expenseRows = document.querySelectorAll('.expense-row');
+                for (const row of expenseRows) {
+                    const expense = {
+                        project: row.querySelector('.expense-project').value,
+                        amount: row.querySelector('.expense-amount').value,
+                        statement: row.querySelector('.expense-statement').value,
+                        to: row.querySelector('.expense-to').value,
+                        receipt: '' // للملفات، سنتعامل معها هنا
+                    };
+                    const fileInput = row.querySelector('.expense-receipt');
+                    if (fileInput.files.length > 0) {
+                        // تحويل الملف إلى base64 (قد يكون كبيرًا، لكن للبساطة)
+                        const file = fileInput.files[0];
+                        const reader = new FileReader();
+                        await new Promise((resolve) => {
+                            reader.onload = (e) => {
+                                expense.receipt = e.target.result; // base64
+                                resolve();
+                            };
+                            reader.readAsDataURL(file);
+                        });
+                    }
+                    data.expenses.push(expense);
+                }
+            }
+
+            // الصعوبات
+            if (toggles.difficulties) {
+                const difficultyRows = document.querySelectorAll('.difficulty-row');
+                difficultyRows.forEach(row => {
+                    data.difficulties.push({
+                        issue: row.querySelector('.difficulty-issue').value,
+                        needs: row.querySelector('.difficulty-needs').value,
+                        suggestions: row.querySelector('.difficulty-suggestions').value
+                    });
+                });
+            }
+
+            // تحويل الجداول إلى JSON strings إذا لزم
+            data.tasks = JSON.stringify(data.tasks);
+            data.expenses = JSON.stringify(data.expenses);
+            data.difficulties = JSON.stringify(data.difficulties);
+
+            // إرسال إلى SheetDB
+            fetch('https://sheetdb.io/api/v1/2ox4qkz0u3oom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: [data] })
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.created) {
+                    alert('تم الإرسال بنجاح!');
+                } else {
+                    alert('حدث خطأ أثناء الإرسال.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ.');
+            });
+        });
+    </script>
 </body>
 </html>
