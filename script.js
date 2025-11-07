@@ -77,12 +77,11 @@ function initPage(section, url) {
     sendBtn.disabled = true;
     statusEl.textContent = "📤 جاري الإرسال...";
 
-    try {
+   try {
       await fetch(url, {
         method: "POST",
-        mode: "no-cors", // ضروري جدًا
-        body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
       statusEl.textContent = "✅ تم الإرسال بنجاح.";
